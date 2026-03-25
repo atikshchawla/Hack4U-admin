@@ -1,0 +1,185 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @map("user_id") @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String  @map("provider_account_id")
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@map("accounts")
+}
+
+model Session {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  sessionToken String   @unique @map("session_token")
+  userId       String   @map("user_id") @db.ObjectId
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("sessions")
+}
+
+model User {
+  id            String    @id @default(auto()) @map("_id") @db.ObjectId
+  name          String?
+  email         String    @unique
+  emailVerified DateTime? @map("email_verified")
+  image         String?
+  isRegistered  Boolean   @default(false) @map("is_registered")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  accounts Account[]
+  sessions Session[]
+
+  // Relation to VIT student
+  vitStudent VITStudent?
+
+  @@map("users")
+}
+
+model VerificationToken {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+  @@map("verificationtokens")
+}
+
+model VITStudent {
+  id            String   @id @default(auto()) @map("_id") @db.ObjectId
+  name          String
+  regNo         String   @unique
+  year          Int
+  phone         String
+  accommodation String // "dayscholar" or "hostel"
+  hostelType    String? // "lh" or "mh" (optional, only for hostel students)
+  block         String? // optional, only for hostel students
+  room          String? // optional, only for hostel students
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  teamId String? @map("team_id") @db.ObjectId
+  team   Team?   @relation(fields: [teamId], references: [id])
+
+  userId String? @unique @map("user_id") @db.ObjectId
+  user   User?   @relation(fields: [userId], references: [id])
+
+  @@map("vit_students")
+}
+
+model Team {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  name        String
+  code        String   @unique // 6-character unique team code
+  description String?
+  category    String
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Project Information
+  projectTitle       String? @map("project_title")
+  projectDescription String? @map("project_description")
+  track              String?
+  githubLink         String? @map("github_link")
+  figmaLink          String? @map("figma_link")
+  pptLink            String? @map("ppt_link")
+  otherLinks         String? @map("other_links")
+  submitted          Boolean @default(false)
+
+  // Relations
+  vitStudents VITStudent[]
+  review      Review[]
+
+  @@map("teams")
+}
+
+model Yantra {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  name               String?
+  email              String   @unique
+  registrationNumber String?
+  isVITian           Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  @@map("yantra")
+}
+
+model Review {
+  id       String @id @default(auto()) @map("_id") @db.ObjectId
+  Team     Team   @relation(fields: [teamId], references: [id])
+  teamId   String @db.ObjectId
+  round    Round
+  round_id String @db.ObjectId
+
+  reviewerUserId String   @db.ObjectId
+  remarks        String?
+  createdAt      DateTime @default(now())
+
+  admin  Admin    @relation(fields: [reviewerUserId], references: [id])
+  round1 Round_1? @relation(fields: [round_id], references: [id])
+  round2 Round_2? @relation(fields: [round_id], references: [id])
+}
+
+model Admin {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  name               String
+  email              String
+  registrationNumber String   @unique
+  review             Review[]
+}
+
+model Round_1 {
+  id             String   @id @default(auto()) @map("_id") @db.ObjectId
+  problemClarity Int
+  UIUX           Int
+  feasibility    Int
+  TechStack      Int
+  pitch          Int
+  Total          Int
+  review         Review[]
+}
+
+model Round_2 {
+  id                 String   @id @default(auto()) @map("_id") @db.ObjectId
+  designUX           Int
+  technicalExecution Int
+  web3Integration    Int
+  impact             Int
+  completeness       Int
+  futureScope        Int
+  Total              Int
+  review             Review[]
+}
+
+enum Round {
+  ONE
+  TWO
+}
