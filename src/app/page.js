@@ -5,8 +5,8 @@ export default function SignInPage() {
     <div className="relative min-h-screen flex flex-col bg-black/50">
       <div className="absolute inset-0 -z-5 rounded-[1280px] bg-[#669C7D] blur-[375px] opacity-35"></div>
       <div className="flex flex-col items-center pt-18">
-        <h1 className="text-[70px] font-brand bg-linear-to-b from-white to-[rgba(213,213,213,0.68)] bg-clip-text text-transparent"> B³</h1>
-        <h2 className="text-[36px] font-brand bg-linear-to-b from-white to-[rgba(213,213,213,0.68)] bg-clip-text text-transparent">Build. Block. Break. </h2>
+        <h1 className="text-[70px] font-brand bg-linear-to-b from-white to-[rgba(213,213,213,0.68)] bg-clip-text text-transparent">H4U</h1>
+        <h2 className="text-[36px] font-brand bg-linear-to-b from-white to-[rgba(213,213,213,0.68)] bg-clip-text text-transparent">Hack. Build. Ship.</h2>
       </div>
       <div className="flex flex-col items-center justify-center pt-20">
         <div className="w-max flex flex-col items-center rounded-[25px] bg-[rgba(255,255,255,0.10)] backdrop-blur-md border border-white/30 inset-shadow-sm/30 shadow-xl px-18 py-4 gap-12">
